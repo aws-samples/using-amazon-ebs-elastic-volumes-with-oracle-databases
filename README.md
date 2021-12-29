@@ -1,4 +1,4 @@
-## My Project
+## Using Amazon EBS elastic volumes with Oracle databases
 
 The three part blog series, [Using Amazon EBS elastic volumes with Oracle
 databases](https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-1-introduction/)
