@@ -2,7 +2,7 @@
 
 
 This sample demonstrates how to use elastic volumes to increase the database
-storage and change the IOPS provisioned without an impact on database
+storage or change the IOPS provisioned without an impact on database
 availability or performance. This focuses on Oracle databases that do not use a
 Logical Volume Manager (LVM) for database storage management.
 
