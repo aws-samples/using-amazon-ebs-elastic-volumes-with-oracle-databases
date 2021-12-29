@@ -1,0 +1,89 @@
+//This file contains the OS commands and AWS CLI commands used in this blog "Using Amazon EBS elastic volumes with Oracle databases (part 2): databases using LVM" 
+//Blog URL - https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-2-databases-using-lvm/
+
+#Verify that the volumes are attached to the instance using the lsblk command.
+
+lsblk
+
+#We need to install the lvm package if it’s not already installed. You can verify the installation using the following command.
+
+rpm -qa |grep -i lvm
+
+#If lvm in not installed, you can install it using the yum command 
+
+yum install lvm2*
+
+#Create the physical volumes using LVM.
+
+pvcreate /dev/xvdg
+
+pvcreate /dev/xvdh
+
+#Create the volume group using LVM.
+
+vgcreate EV-Datafile-VG /dev/sdg /dev/sdh
+
+#Create the logical volume using LVM.
+
+lvcreate -l +100%FREE -n EV-Data-LV EV-Datafile-VG
+
+#Verify the configuration using the pvdisplay, vgdisplay, and lvdisplay commands 
+
+pvdisplay
+
+vgdisplay
+
+lvdisplay EV-Datafile-VG
+
+# For storing the data files, we create a directory called customdf 
+
+mkdir -p /u01/app/oracle/oradata/cdb1/pdb1/customdf
+
+#Create a file system on the logical volume and mount it at /u01/app/oracle/oradata/cdb1/pdb1/customdf/ 
+
+mkfs.ext4 /dev/EV-Datafile-VG/EV-Data-LV 
+
+mount /dev/EV-Datafile-VG/EV-Data-LV /u01/app/oracle/oradata/cdb1/pdb1/customdf/
+
+#Verify the disk utilization at the OS level using the df command 
+
+df –h
+
+#Increase the size of the EBS volumes to 100 GiB from 200 GiB using the AWS CLI.
+
+aws ec2 modify-volume --region us-east-1 --volume-id <replace-with-your-ebs-volume-id> --size 200
+aws ec2 modify-volume --region us-east-1 --volume-id <replace-with-your-ebs-volume-id> --size 200
+
+#Check the modification status using the AWS CLI
+
+aws ec2 describe-volumes-modifications --region us-east-1 --volume-id <replace-with-your-ebs-volume-id>
+aws ec2 describe-volumes-modifications --region us-east-1 --volume-id <replace-with-your-ebs-volume-id>
+
+#Resize the physical volumes, using the pvresize command
+
+pvresize /dev/sdg
+
+pvresize /dev/sdh
+
+#Verify that the new size is reflected using the pvdisplay command
+
+pvdisplay /dev/sdg
+pvdisplay /dev/sdh 
+
+#Resize the logical volume using the lvresize command. The –l +100%FREE option of the lvresize command allocates all the newly added space to the logical volume.
+
+lvresize -l +100%FREE /dev/EV-Datafile-VG/EV-Data-LV
+
+#Verify that the new volume size now appears using the lvdisplay command
+
+lvdisplay EV-Datafile-VG
+
+#Resize the file system (ext4) using the resize2fs command
+
+resize2fs /dev/EV-Datafile-VG/EV-Data-LV 
+
+#Verify that the file system has been resized using the df command
+
+df -h
+
+

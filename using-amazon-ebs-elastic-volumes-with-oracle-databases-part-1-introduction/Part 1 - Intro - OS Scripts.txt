@@ -1,0 +1,32 @@
+#This file contains the OS commands and AWS CLI commands used in this blog "Using Amazon EBS elastic volumes with Oracle databases (part 1): Introduction" 
+#Blog URL - https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-1-introduction/  
+
+# Create a directory called customdf
+
+mkdir -p /u01/app/oracle/oradata/cdb1/pdb1/customdf
+
+# Create a file system and mount it at /u01/app/oracle/oradata/cdb1/pdb1/customdf/ 
+
+mkfs -t ext4 /dev/nvme2n1
+mount /dev/nvme2n1 /u01/app/oracle/oradata/cdb1/pdb1/customdfs/
+
+# Verify the disk utilization at the OS level using the df command
+
+df –h
+
+# Increase the size of the EBS volume to 60 GiB from 30 GiB using the AWS CLI.
+
+aws ec2 modify-volume --region us-east-1 --volume-id <replace-with-your-ebs-volume-id> --size 60
+
+# Verify volume modification status
+
+aws ec2 describe-volumes-modifications --region us-east-1 --volume-id <replace-with-your-ebs-volume-id>
+
+#Use the resize2fs command to resize the file system.
+
+resize2fs /dev/nvme2n1
+
+#verify new size
+
+df -h
+

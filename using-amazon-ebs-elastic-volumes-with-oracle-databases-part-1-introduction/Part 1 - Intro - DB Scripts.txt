@@ -1,0 +1,86 @@
+//This file contains the database scripts used in this blog "Using Amazon EBS elastic volumes with Oracle databases (part 1): Introduction" 
+//Blog URL - https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-1-introduction/  
+
+
+//Script to create a 20-GB tablespace called EVTestTableSpace using SQL*Plus 
+
+create tablespace  EVTestTableSpace datafile '/u01/app/oracle/oradata/cdb1/pdb1/customdfs/evtest.dbf' size 20000M;
+
+//Script to verify location of the created datafile
+
+SELECT du.username, du.default_tablespace, ts.ts#, df.name, round(df.BYTES/(1024*1024*1024)) size_gb , df.blocks
+FROM dba_users du, v$tablespace ts, v$datafile df
+WHERE du.default_tablespace = ts.name AND ts.ts# = df.ts# AND du.username = 'TESTEVUSER'
+
+//Script to create and initialize the evtesttab and other related tables, and the definition of the evtestproc stored procedure
+
+//create table to store the test data
+CREATE TABLE evtesttab(counter NUMBER, seconds_elapsed NUMBER, data VARCHAR2(50));
+
+//create table to store error messages if any
+CREATE TABLE evtesterrortab(err_msg VARCHAR2(2000), time DATE);
+
+//create table storing a flag to interrupt the execution of PL/SQL procedure from another SQL session 
+CREATE TABLE flagtab(delflag VARCHAR2(2));
+
+INSERT INTO flagtab VALUES('N'); // inserting the initial record
+
+COMMIT;
+
+
+/*****************************************************
+PL/SQL stored procedure to test the live resizing of Amazon EBS volumes used for Oracle database storage using the 'Elastic Volumes' feature.
+
+Name: evtestproc
+******************************************************/
+
+CREATE OR REPLACE PROCEDURE evtestproc
+IS
+  l_flag varchar2(2);
+  l_cntr number default 1;
+  l_sec number default 10;
+  l_errmsg varchar2(350);
+BEGIN
+  WHILE true LOOP
+    SELECT delflag into l_flag FROM flagtab;
+    IF l_flag = 'Y'
+    THEN
+      EXIT;
+    END IF;
+    INSERT INTO evtesttab VALUES(l_cntr, l_sec, 'Record inserted at ' || to_char(SYSDATE, 'DD-MM-YY HH:MI:SS'));
+    COMMIT;
+    l_cntr := l_cntr + 1;
+    l_sec := l_sec + 10;
+    DBMS_LOCK.SLEEP(10);
+  END LOOP;
+EXCEPTION
+  WHEN others THEN
+    l_errmsg := SUBSTR(SQLERRM, 1, 300);
+    INSERT INTO evtesterrortab VALUES(l_errmsg , SYSDATE);
+    COMMIT;
+END;
+
+
+//Script to start the evtestproc stored procedure to insert records into the evtesttab table while we increase the storage provisioned to the database.
+
+begin
+  evtestproc();  //PLSQL procedure to insert records into the EVTESTTAB table at 10-second intervals
+end;
+
+//Script to verify that records are being inserted.
+
+SELECT * FROM evtesttab;
+
+//Script to add another 20-GB data file called evtest_02.dbf to the EVTestTableSpace tablespace to increase the database storage
+
+ALTER TABLESPACE EVTestTableSpace ADD DATAFILE '/u01/app/oracle/oradata/cdb1/pdb1/customdf/evtest_02.dbf' size 20000M;
+
+//Script to verify that the new datafile is created
+
+SELECT du.username, du.default_tablespace, ts.ts#, df.name, round(df.BYTES/(1024*1024*1024)) size_gb , df.blocks
+FROM dba_users du, v$tablespace ts, v$datafile df
+WHERE du.default_tablespace = ts.name AND ts.ts# = df.ts# AND du.username = 'TESTEVUSER'
+
+//Script to query the evtesttab to verify that the database was available during the resize
+
+Select * from evtesttab;

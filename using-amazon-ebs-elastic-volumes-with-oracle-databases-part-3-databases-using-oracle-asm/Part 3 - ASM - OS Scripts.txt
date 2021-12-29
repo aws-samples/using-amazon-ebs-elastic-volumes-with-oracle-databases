@@ -1,0 +1,28 @@
+//This file contains the OS commands and AWS CLI commands used in this blog "Using Amazon EBS elastic volumes with Oracle databases (part 3): databases using ASM" 
+//Blog URL - https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-3-databases-using-oracle-asm/
+
+
+#Increase the size of the EBS volumes to 50 GiB from 100 GiB using the AWS CLI. Do this once for each EBS volume.
+
+aws ec2 modify-volume --region us-west-2 --volume-id <replace-with-your-ebs-volume-id> --size 100
+
+#Check the modification status using the AWS CLI. Do this once for each EBS volume.
+
+aws ec2 describe-volumes-modifications --region us-west-2 --volume-id <replace-with-your-ebs-volume-id>
+
+#Log in as the OS user (Oracle in this example) used to set up ORACLE_HOME. Use the oracleasm querydisk command to find the device major and minor number as shown following.
+
+/etc/init.d/oracleasm querydisk -d DATA1
+
+#After finding the disk major and minor number (from the previous command), use the following command to find the device name at the OS level
+
+ls -la /dev/ | grep <replace-with-disk-major-number-from-previous-command> | grep <replace-with-disk-minor-number-from-previous-command>
+
+#Use the fdisk command to resize the partition
+
+fdisk /dev/xvdf
+
+#Use the partx command to update the in-memory kernel partition table from the on-disk partition table
+
+partx -u /dev/xvdf
+

@@ -1,0 +1,58 @@
+//This file contains the database scripts used in this blog "Using Amazon EBS elastic volumes with Oracle databases (part 3): databases using ASM" 
+//Blog URL - https://aws.amazon.com/blogs/database/using-amazon-ebs-elastic-volumes-with-oracle-databases-part-3-databases-using-oracle-asm/
+
+
+//Script to query the v$asm_diskgroup view and verify that the DATA disk group has a total size of 300 GB and contains six ASM disks (backed by the six EBS volumes) 
+
+SELECT substr(g.name, 1, 10) disk_group_name,round(g.total_mb/1024) total_dg_size_gb,g.type redundancy_type,
+substr (d.path, 1,10) disk_path,round (d.os_mb/1024) os_disk_size_gb,round (d.total_mb/1024) asm_disk_size_gb
+FROM $asm_diskgroup g, v$asm_disk d WHERE g.group_number = d.group_number AND g. name = 'DATA';
+
+//Script to create a big file tablespace, 250 GB in size, called EVTestTablespace 
+
+CREATE BIGFILE TABLESPACE EVTestTableSpace DATAFILE '+DATA' SIZE 250G;
+
+//Script to verify that the tablespace has been created
+
+SELECT du.username, du.default_tablespace, ts.ts#, df.name, round(df.BYTES/(1024*1024*1024)) size_gb , df.blocks
+FROM dba_users du, v$tablespace ts, v$datafile df
+WHERE du.default_tablespace = ts.name AND ts.ts# = df.ts# AND du.username = 'TESTEVUSER'
+
+//Script to show how much of the space has been provisioned for the ASM disk group called DATA.
+
+SELECT round(total_mb/1024) diskgroup_size_gb, round (cold_used_mb/1024) used_size_gb FROM v$asm_diskgroup WHERE name = 'DATA'
+
+//Script to start the evtestproc stored procedure to insert records into the evtesttab table while we increase the storage provisioned to the database.
+
+begin
+  evtestproc();  //PLSQL procedure to insert records into the EVTESTTAB table at 10-second intervals
+end;
+
+//Script to verify that records are being inserted.
+
+SELECT * FROM evtesttab;
+
+//Script to query the v$asm_diskgroup view and verify that the ASM disks are reflecting the new size 
+
+SELECT substr(g.name, 1, 10) disk_group_name,round(g.total_mb/1024) total_dg_size_gb,g.type redundancy_type,
+substr (d.path, 1,10) disk_path,round (d.os_mb/1024) os_disk_size_gb,round (d.total_mb/1024) asm_disk_size_gb
+FROM $asm_diskgroup g, v$asm_disk d WHERE g.group_number = d.group_number AND g. name = 'DATA';
+
+// Script to increase the database storage available by resizing the big file tablespace to 500 GB
+
+ALTER TABLESPACE EVTestTableSpace RESIZE 500G;
+
+//Script to verify the new size of the tablespace
+
+SELECT du.username, du.default_tablespace, ts.ts#, df.name, round(df.BYTES/(1024*1024*1024)) size_gb , df.blocks
+FROM dba_users du, v$tablespace ts, v$datafile df
+WHERE du.default_tablespace = ts.name AND ts.ts# = df.ts# AND du.username = 'TESTEVUSER'
+
+//Script to show how much of the space has been provisioned for the ASM disk group called DATA after the modification
+
+SELECT round(total_mb/1024) diskgroup_size_gb, round (cold_used_mb/1024) used_size_gb FROM v$asm_diskgroup WHERE name = 'DATA'
+
+//Script to query the evtesttab to verify that the database was available during the resize
+
+Select * from evtesttab;
+
