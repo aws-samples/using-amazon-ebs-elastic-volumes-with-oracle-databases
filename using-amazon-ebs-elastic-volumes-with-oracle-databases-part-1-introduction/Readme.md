@@ -29,7 +29,7 @@ There are two script files associated with this sample
 
     -   Command to resize the newly created filesystem
 
--   *“Part 1 - Intro - DB Scripts.txt”* – This file contains the database
+-   **“Part 1 - Intro - DB Scripts.txt”** – This file contains the database
     scripts and commands used, including the following
 
     -   Script to create the EVTestTableSpace tablespace
