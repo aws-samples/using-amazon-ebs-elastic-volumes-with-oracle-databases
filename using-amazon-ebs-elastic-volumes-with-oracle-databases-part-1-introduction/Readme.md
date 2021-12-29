@@ -18,7 +18,7 @@ Please refer the blog for detailed, step by step, instructions.
 
 There are two script files associated with this sample
 
--   *“Part 1 - Intro - OS Scripts.txt”* – This file contains the Linux OS
+-   **“Part 1 - Intro - OS Scripts.txt”** – This file contains the Linux OS
     commands and AWS CLI commands used, including the following
 
     -   Command to create a directory called customdf
