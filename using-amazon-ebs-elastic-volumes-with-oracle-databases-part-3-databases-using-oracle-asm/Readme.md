@@ -29,7 +29,7 @@ There are two script files associated with this sample
 
     -   Command to update the in-memory kernel partition table after resizing
 
--   *“Part 3 - ASM - DB Scripts”* – This file contains the database scripts and
+-   [“Part 3 - ASM - DB Scripts”](Part%203%20-%20ASM%20-%20DB%20Scripts.txt) – This file contains the database scripts and
     commands used, including the following
 
     -   Script to query the v\$asm_diskgroup view and verify the disk group and
