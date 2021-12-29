@@ -14,16 +14,15 @@ covers Oracle databases that use an LVM for database storage management. [Part
 covers Oracle databases that use Oracle Automatic Storage Management (Oracle
 ASM).
 
-This project contains the database scripts, and OS and AWS CLI commands used in
-the blog posts.
+This project contains the database scripts, and OS and AWS CLI commands used in the blog posts.
 
 You can find the scripts and instructions for each of the parts here
 
--   Script used in Part 1 – Intro (databases without LVM)
+-   [Scripts used in Part 1 – Intro (databases without LVM)](using-amazon-ebs-elastic-volumes-with-oracle-databases-part-1-introduction)
 
--   Script used in Part 2 – Logical Volume Manager (LVM)
+-   [Scripts used in Part 2 – Logical Volume Manager (LVM)](using-amazon-ebs-elastic-volumes-with-oracle-databases-part-2-databases-using-lvm)
 
--   Script used in Part 3 – Oracle Automated Storage Management (ASM)
+-   [Scripts used in Part 3 – Oracle Automated Storage Management (ASM)](using-amazon-ebs-elastic-volumes-with-oracle-databases-part-3-databases-using-oracle-asm)
 
 
 ## Security
