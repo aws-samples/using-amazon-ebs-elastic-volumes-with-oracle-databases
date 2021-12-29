@@ -15,7 +15,7 @@ Please refer the blog for detailed, step by step, instructions.
 
 There are two script files associated with this sample
 
--   **“Part 2 - LVM - OS Scripts”** – This file contains the Linux OS commands and
+-   [“Part 2 - LVM - OS Scripts”](Part%202%20-%20LVM%20-%20OS%20Scripts.txt) – This file contains the Linux OS commands and
     AWS CLI commands used, including the following
 
     -   Commands to check and install LVM if needed
@@ -36,7 +36,7 @@ There are two script files associated with this sample
 
     -   Command to resize the filesystem (resize2fs)
 
--   **“Part 2 - LVM - DB Scripts”** – This file contains the database scripts and
+-   [“Part 2 - LVM - DB Scripts”](Part%202%20-%20LVM%20-%20DB%20Scripts.txt) – This file contains the database scripts and
     commands used, including the following
 
     -   Script to create the BIGFILE tablespace called EVTestTableSpace
