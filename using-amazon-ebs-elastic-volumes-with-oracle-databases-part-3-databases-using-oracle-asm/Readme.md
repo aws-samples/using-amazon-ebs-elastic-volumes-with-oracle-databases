@@ -15,7 +15,7 @@ Please refer the blog for detailed, step by step, instructions.
 
 There are two script files associated with this sample
 
--   [*“Part 3 - ASM - OS Scripts”*](Part 3 - ASM - OS Scripts.txt) –
+-   [“Part 3 - ASM - OS Scripts”](Part 3 - ASM - OS Scripts.txt) –
     This file contains the Linux OS commands and AWS CLI commands used,
     including the following
 
